@@ -8,18 +8,12 @@ import (
 const samplesPerItem = 10000
 const errorThreshold = 1.0
 
-type DistrError struct {
-	Name     string
-	Expected int
-	Actual   float32
-}
-
 // Tests if weighted distribution works as expected
 func TestDistribution(t *testing.T) {
 	totalSamples := samplesPerItem * len(jri)
 	distr := map[string]int{}
 	for i := 0; i < totalSamples; i++ {
-		distr[Zri()]++
+		distr[Jri()]++
 	}
 
 	weightsSum := 0

@@ -46,7 +46,7 @@ func main() {
 		}
 
 		if update.Message.Text == command {
-			msg := tgbotapi.NewMessage(update.Message.Chat.ID, Zri())
+			msg := tgbotapi.NewMessage(update.Message.Chat.ID, Jri())
 			_, err := bot.Send(msg)
 			if err != nil {
 				log.Printf("Error sending message: %s", err)

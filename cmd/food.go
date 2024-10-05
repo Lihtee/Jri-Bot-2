@@ -1,6 +1,7 @@
 package main
 
 import (
+	fr "github.com/dreyspi/jribot2/cmd/frequency"
 	wr "github.com/mroth/weightedrand"
 	"log"
 )
@@ -11,36 +12,36 @@ type Food struct {
 }
 
 var jri []*Food = []*Food{
-	newFood("Сожри пицц", 2),               // 2 в сесяц
-	newFood("Сожри роллс", 1),              // 1 в сесяц
-	newFood("Сожри курицу из KFC", 8),      // 2 раза в неделю
-	newFood("Сожри чикан", 0),              // 0 раз (только с сырной коллеццией можна жрать это, в последний сас была зимой)
-	newFood("Сожри арбыс или дыню", 1),     // 1 раз в сесяц
-	newFood("Сожри бургерс", 8),            // 1 раз в неделю
-	newFood("Сожри шашлык", 4),             // 1 раз в неделю
-	newFood("Сожри шаурму", 4),             // 1 раз в неделю
-	newFood("Сожри хинкали с хачапури", 1), // 1 раз в месяц
-	newFood("Сожри сэсвич", 2),             // 2 раза в сесяц (осталось найти где их жрать)
-	newFood("Сожри стейк", 1),              // 1 раз в сесяц
-	newFood("Сожри блин", 2),               // 2 раза в сесяц
-	newFood("Сожри пак гадюки", 1),         // 1 раз в сесяц
-	newFood("Сожри ночной снэк", 8),        // 2 раза в неделю
-	newFood("Сожри рамен", 4),              // 1 раз в неделю
-	newFood("Сожри WOK", 4),                // 1 раз в неделю
-	newFood("Сожри рыс с яйцом", 4),        // 1 раз в неделю
-	newFood("Сожри сало", 2),               // 2 раза в сесяц
-	newFood("Сожри CUMнам", 1),             // 1 раз в сесяц
-	newFood("Сожри чабуреки", 2),           // 2 раза в сесяц
-	newFood("Сожри пироженку", 1),          // 1 раз в сесяц
-	newFood("Сожри колбаски", 2),           // 2 раза в сесяц
-	newFood("Сожри понтовые вафли", 1),     // 1 раз в сесяц
-	newFood("Сожри карбонару", 2),          // 2 раза в сесяц
-	newFood("Сожри торт", 1),               // 1 раз в сесяц
+	newFood("Сожри пицц", fr.Month*2),
+	newFood("Сожри роллс", fr.Month*1),
+	newFood("Сожри курицу из KFC", fr.Week*2),
+	newFood("Сожри чикан", 0),
+	newFood("Сожри арбыс или дыню", fr.Month*1),
+	newFood("Сожри бургерс", fr.Week*1),
+	newFood("Сожри шашлык", fr.Week*1),
+	newFood("Сожри шаурму", fr.Week*1),
+	newFood("Сожри хинкали с хачапури", fr.Month*1),
+	newFood("Сожри сэсвич", fr.Month*2),
+	newFood("Сожри стейк", fr.Month*1),
+	newFood("Сожри блин", fr.Month*2),
+	newFood("Сожри пак гадюки", fr.Month*1),
+	newFood("Сожри ночной снэк", fr.Week*2),
+	newFood("Сожри рамен", fr.Week*1),
+	newFood("Сожри WOK", fr.Week*1),
+	newFood("Сожри рыс с яйцом", fr.Week*1),
+	newFood("Сожри сало", fr.Month*2),
+	newFood("Сожри CUMнам", fr.Month*1),
+	newFood("Сожри чабуреки", fr.Month*2),
+	newFood("Сожри пироженку", fr.Month*1),
+	newFood("Сожри колбаски", fr.Month*2),
+	newFood("Сожри понтовые вафли", fr.Month*1),
+	newFood("Сожри карбонару", fr.Month*2),
+	newFood("Сожри торт", fr.Month*1),
 }
 
 var chooser = newChooser()
 
-func Zri() string {
+func Jri() string {
 	return chooser.Pick().(string)
 }
 
