@@ -13,6 +13,18 @@ var numericKeyboard = tgbotapi.NewReplyKeyboard(
 	),
 )
 
+var defaultMenuMarkup = tgbotapi.NewInlineKeyboardMarkup(
+	tgbotapi.NewInlineKeyboardRow(
+		tgbotapi.NewInlineKeyboardButtonData("spi", "spi"),
+	),
+)
+
+var updatedMenuMarkup = tgbotapi.NewInlineKeyboardMarkup(
+	tgbotapi.NewInlineKeyboardRow(
+		tgbotapi.NewInlineKeyboardButtonData("ne spi", "ne spi"),
+	),
+)
+
 func main() {
 	bot, err := tgbotapi.NewBotAPI("7624316444:AAHWLQNfzGOjzjf0p99l8WHe5nwPcHXpGZQ")
 	if err != nil {
@@ -29,29 +41,64 @@ func main() {
 	updates := bot.GetUpdatesChan(u)
 
 	for update := range updates {
-		if update.Message == nil {
-			continue
+		if update.Message != nil {
+			log.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
+			respondToMessage(update.Message, bot)
 		}
 
-		log.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
-
-		if update.Message.Text != command {
-			msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Жми кнопку жэсть")
-			msg.ReplyMarkup = numericKeyboard
-			_, err := bot.Send(msg)
-			if err != nil {
-				log.Printf("Error sending message: %s", err)
-			}
-			continue
+		if update.CallbackQuery != nil {
+			// Some logging
+			//j, err := json.Marshal(update)
+			//if err != nil {
+			//	log.Printf("Error on marshaling update: %s", err)
+			//} else {
+			//	log.Printf("Update is: %s", string(j))
+			//}
+			handleButtonClick(update.CallbackQuery, bot)
 		}
+	}
+}
 
-		if update.Message.Text == command {
-			msg := tgbotapi.NewMessage(update.Message.Chat.ID, Jri())
-			_, err := bot.Send(msg)
-			if err != nil {
-				log.Printf("Error sending message: %s", err)
-			}
-			continue
+func handleButtonClick(query *tgbotapi.CallbackQuery, bot *tgbotapi.BotAPI) {
+	if query.Data == "spi" {
+		message := query.Message
+		update := tgbotapi.NewEditMessageTextAndMarkup(message.Chat.ID, message.MessageID, message.Text, updatedMenuMarkup)
+		_, err := bot.Send(update)
+		if err != nil {
+			log.Printf("Error handling %s callback: %s", query.Data, err)
 		}
+		return
+	}
+
+	if query.Data == "ne spi" {
+		message := query.Message
+		update := tgbotapi.NewEditMessageTextAndMarkup(message.Chat.ID, message.MessageID, message.Text, defaultMenuMarkup)
+		_, err := bot.Send(update)
+		if err != nil {
+			log.Printf("Error handling %s callback: %s", query.Data, err)
+		}
+		return
+	}
+}
+
+func respondToMessage(message *tgbotapi.Message, bot *tgbotapi.BotAPI) {
+	if message.Text != command {
+		msg := tgbotapi.NewMessage(message.Chat.ID, "Жми кнопку жэсть")
+		msg.ReplyMarkup = numericKeyboard
+		_, err := bot.Send(msg)
+		if err != nil {
+			log.Printf("Error sending message: %s", err)
+		}
+		return
+	}
+
+	if message.Text == command {
+		msg := tgbotapi.NewMessage(message.Chat.ID, Jri())
+		msg.ReplyMarkup = defaultMenuMarkup
+		_, err := bot.Send(msg)
+		if err != nil {
+			log.Printf("Error sending message: %s", err)
+		}
+		return
 	}
 }
