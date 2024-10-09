@@ -1,104 +1,80 @@
 package main
 
 import (
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"fmt"
 	"log"
+	"time"
+
+	tele "gopkg.in/telebot.v3"
 )
 
 const command = "Че сожрать"
 
-var numericKeyboard = tgbotapi.NewReplyKeyboard(
-	tgbotapi.NewKeyboardButtonRow(
-		tgbotapi.NewKeyboardButton(command),
-	),
+var (
+	jriButton = tele.ReplyButton{Text: command}
+	keyboard  = &tele.ReplyMarkup{
+		ResizeKeyboard: true,
+		ReplyKeyboard: [][]tele.ReplyButton{
+			{jriButton},
+		},
+	}
 )
 
-var defaultMenuMarkup = tgbotapi.NewInlineKeyboardMarkup(
-	tgbotapi.NewInlineKeyboardRow(
-		tgbotapi.NewInlineKeyboardButtonData("spi", "spi"),
-	),
-)
-
-var updatedMenuMarkup = tgbotapi.NewInlineKeyboardMarkup(
-	tgbotapi.NewInlineKeyboardRow(
-		tgbotapi.NewInlineKeyboardButtonData("ne spi", "ne spi"),
-	),
+// Unique is best to be english letters only, otherwise the regex inside router breaks
+var (
+	spiButton     = tele.InlineButton{Text: "spi", Unique: "spi"}
+	neSpiButton   = tele.InlineButton{Text: "ne spi", Unique: "neSpi"}
+	inlineSpiMenu = &tele.ReplyMarkup{
+		InlineKeyboard: [][]tele.InlineButton{
+			{spiButton},
+		},
+	}
+	inlineNeSpiMenu = &tele.ReplyMarkup{
+		InlineKeyboard: [][]tele.InlineButton{
+			{neSpiButton},
+		},
+	}
 )
 
 func main() {
-	bot, err := tgbotapi.NewBotAPI("7624316444:AAHWLQNfzGOjzjf0p99l8WHe5nwPcHXpGZQ")
+	pref := tele.Settings{
+		//Token:  os.Getenv("TOKEN"),
+		Token:   "7624316444:AAHWLQNfzGOjzjf0p99l8WHe5nwPcHXpGZQ",
+		Poller:  &tele.LongPoller{Timeout: 10 * time.Second},
+		Verbose: false,
+	}
+
+	b, err := tele.NewBot(pref)
 	if err != nil {
-		log.Panic(err)
-	}
-
-	bot.Debug = true
-
-	log.Printf("Authorized on account %s", bot.Self.UserName)
-
-	u := tgbotapi.NewUpdate(0)
-	u.Timeout = 60
-
-	updates := bot.GetUpdatesChan(u)
-
-	for update := range updates {
-		if update.Message != nil {
-			log.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
-			respondToMessage(update.Message, bot)
-		}
-
-		if update.CallbackQuery != nil {
-			// Some logging
-			//j, err := json.Marshal(update)
-			//if err != nil {
-			//	log.Printf("Error on marshaling update: %s", err)
-			//} else {
-			//	log.Printf("Update is: %s", string(j))
-			//}
-			handleButtonClick(update.CallbackQuery, bot)
-		}
-	}
-}
-
-func handleButtonClick(query *tgbotapi.CallbackQuery, bot *tgbotapi.BotAPI) {
-	if query.Data == "spi" {
-		message := query.Message
-		update := tgbotapi.NewEditMessageTextAndMarkup(message.Chat.ID, message.MessageID, message.Text, updatedMenuMarkup)
-		_, err := bot.Send(update)
-		if err != nil {
-			log.Printf("Error handling %s callback: %s", query.Data, err)
-		}
+		log.Fatal(err)
 		return
 	}
 
-	if query.Data == "ne spi" {
-		message := query.Message
-		update := tgbotapi.NewEditMessageTextAndMarkup(message.Chat.ID, message.MessageID, message.Text, defaultMenuMarkup)
-		_, err := bot.Send(update)
-		if err != nil {
-			log.Printf("Error handling %s callback: %s", query.Data, err)
-		}
-		return
-	}
-}
+	b.Handle(command, func(c tele.Context) error {
+		return c.Send(Jri(), inlineSpiMenu)
+	})
 
-func respondToMessage(message *tgbotapi.Message, bot *tgbotapi.BotAPI) {
-	if message.Text != command {
-		msg := tgbotapi.NewMessage(message.Chat.ID, "Жми кнопку жэсть")
-		msg.ReplyMarkup = numericKeyboard
-		_, err := bot.Send(msg)
+	b.Handle("\fspi", func(c tele.Context) error {
+		fmt.Println("spi button_____")
+		_, err := b.Edit(c.Message(), inlineNeSpiMenu)
 		if err != nil {
-			log.Printf("Error sending message: %s", err)
+			fmt.Printf("Error: %s", err)
 		}
-		return
-	}
+		return err
+	})
 
-	if message.Text == command {
-		msg := tgbotapi.NewMessage(message.Chat.ID, Jri())
-		msg.ReplyMarkup = defaultMenuMarkup
-		_, err := bot.Send(msg)
+	b.Handle(&neSpiButton, func(c tele.Context) error {
+		fmt.Println("ne spi button_____")
+		_, err := b.Edit(c.Message(), inlineSpiMenu)
 		if err != nil {
-			log.Printf("Error sending message: %s", err)
+			fmt.Printf("Error: %s", err)
 		}
-		return
-	}
+		return err
+	})
+
+	b.Handle(tele.OnText, func(c tele.Context) error {
+		return c.Send("Жми кнопку жэсть", keyboard)
+	})
+
+	b.Start()
 }
