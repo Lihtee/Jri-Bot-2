@@ -13,8 +13,8 @@ const jriCommand = "Че сожрать"
 const star = "⭐"
 
 var (
-	jriButton = tele.ReplyButton{Text: jriCommand}
-	keyboard  = &tele.ReplyMarkup{
+	jriButton   = tele.ReplyButton{Text: jriCommand}
+	replyLayout = &tele.ReplyMarkup{
 		ResizeKeyboard: true,
 		ReplyKeyboard: [][]tele.ReplyButton{
 			{jriButton},
@@ -52,17 +52,13 @@ func main() {
 			return fmt.Errorf("failed to get food: %w", err)
 		}
 
-		return c.Send(food)
+		return c.Send(food, replyLayout)
 	})
 
 	b.Handle("/start", func(c tele.Context) error {
 		msg := fmt.Sprintf("Жэээээсть, %s опять жрать хочет", c.Sender().Username)
-		selectedPresetId, err := jri.Eda(c.Sender().ID)
-		if err != nil {
-			return fmt.Errorf("failed to get selectedPresetId: %w", err)
-		}
 
-		return c.Send(msg, presetMenuLayout(selectedPresetId))
+		return c.Send(msg, replyLayout)
 	})
 
 	b.Handle("/packs", func(c tele.Context) error {
@@ -84,8 +80,10 @@ func main() {
 
 		_, err = b.Edit(c.Message(), presetMenuLayout(packId))
 		if err != nil {
-			fmt.Printf("falied to update inline menu: %s", err)
 			// Not good but packId is saved for user so send food anyway
+			fmt.Printf("falied to update inline menu: %s", err)
+			// Send something to unlock the button
+			_ = c.Respond(&tele.CallbackResponse{})
 		}
 
 		food, err := jri.Jri(c.Sender().ID)
@@ -93,11 +91,11 @@ func main() {
 			return err
 		}
 
-		return c.Send(food)
+		return c.Send(food, replyLayout)
 	})
 
 	b.Handle(tele.OnText, func(c tele.Context) error {
-		return c.Send("Жми кнопку жэсть", keyboard)
+		return c.Send("Жми кнопку жэсть", replyLayout)
 	})
 
 	b.Start()
