@@ -1,7 +1,7 @@
 FROM golang:1.23.2-alpine3.20
 COPY src/* /src
-WORKDIR /src
+WORKDIR /bot
 
-RUN go build
+RUN go build -C ../src -o ../bot/bot
 
-ENTRYPOINT ["go", "run ./cmd/"]
+ENTRYPOINT ["/bot/bot"]

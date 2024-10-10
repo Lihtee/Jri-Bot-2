@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/dreyspi/jribot2/cmd/jri"
+	"github.com/dreyspi/jribot2/jri"
 	"log"
 	"time"
 

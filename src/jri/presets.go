@@ -1,7 +1,7 @@
 package jri
 
 import (
-	fr "github.com/dreyspi/jribot2/cmd/frequency"
+	fr "github.com/dreyspi/jribot2/frequency"
 )
 
 type Preset = []*Food
