@@ -1,4 +1,4 @@
-package main
+package jri
 
 import (
 	"math"
@@ -7,21 +7,28 @@ import (
 
 const samplesPerItem = 10000
 const errorThreshold = 1.0
+const userId = 2
 
 // Tests if weighted distribution works as expected
 func TestDistribution(t *testing.T) {
-	totalSamples := samplesPerItem * len(jri)
+	preset := BasedPreset
+	totalSamples := samplesPerItem * len(preset)
 	distr := map[string]int{}
 	for i := 0; i < totalSamples; i++ {
-		distr[Jri()]++
+		food, err := Jri(userId)
+		if err != nil {
+			t.Fatalf("%v", err)
+		}
+
+		distr[food]++
 	}
 
 	weightsSum := 0
-	for _, food := range jri {
+	for _, food := range preset {
 		weightsSum += food.Weight
 	}
 
-	for _, food := range jri {
+	for _, food := range preset {
 		foodDistr, ok := distr[food.Name]
 		if !ok && food.Weight > 0 {
 			t.Errorf("Food %s not found in distr", food.Name)

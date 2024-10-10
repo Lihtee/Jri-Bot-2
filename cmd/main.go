@@ -2,36 +2,22 @@ package main
 
 import (
 	"fmt"
+	"github.com/dreyspi/jribot2/cmd/jri"
 	"log"
 	"time"
 
 	tele "gopkg.in/telebot.v3"
 )
 
-const command = "Че сожрать"
+const jriCommand = "Че сожрать"
+const star = "⭐"
 
 var (
-	jriButton = tele.ReplyButton{Text: command}
+	jriButton = tele.ReplyButton{Text: jriCommand}
 	keyboard  = &tele.ReplyMarkup{
 		ResizeKeyboard: true,
 		ReplyKeyboard: [][]tele.ReplyButton{
 			{jriButton},
-		},
-	}
-)
-
-// Unique is best to be english letters only, otherwise the regex inside router breaks
-var (
-	spiButton     = tele.InlineButton{Text: "spi", Unique: "spi"}
-	neSpiButton   = tele.InlineButton{Text: "ne spi", Unique: "neSpi"}
-	inlineSpiMenu = &tele.ReplyMarkup{
-		InlineKeyboard: [][]tele.InlineButton{
-			{spiButton},
-		},
-	}
-	inlineNeSpiMenu = &tele.ReplyMarkup{
-		InlineKeyboard: [][]tele.InlineButton{
-			{neSpiButton},
 		},
 	}
 )
@@ -50,26 +36,64 @@ func main() {
 		return
 	}
 
-	b.Handle(command, func(c tele.Context) error {
-		return c.Send(Jri(), inlineSpiMenu)
+	err = b.SetCommands([]tele.Command{
+		{Text: "/start", Description: "Хочу жрать"},
+		{Text: "/packs", Description: "Покажи еду"},
 	})
 
-	b.Handle("\fspi", func(c tele.Context) error {
-		fmt.Println("spi button_____")
-		_, err := b.Edit(c.Message(), inlineNeSpiMenu)
+	if err != nil {
+		log.Printf("could not set commands: %s", err)
+		// Works ok without commands
+	}
+
+	b.Handle(jriCommand, func(c tele.Context) error {
+		food, err := jri.Jri(c.Sender().ID)
 		if err != nil {
-			fmt.Printf("Error: %s", err)
+			return fmt.Errorf("failed to get food: %w", err)
 		}
-		return err
+
+		return c.Send(food)
 	})
 
-	b.Handle(&neSpiButton, func(c tele.Context) error {
-		fmt.Println("ne spi button_____")
-		_, err := b.Edit(c.Message(), inlineSpiMenu)
+	b.Handle("/start", func(c tele.Context) error {
+		msg := fmt.Sprintf("Жэээээсть, %s опять жрать хочет", c.Sender().Username)
+		selectedPresetId, err := jri.Eda(c.Sender().ID)
 		if err != nil {
-			fmt.Printf("Error: %s", err)
+			return fmt.Errorf("failed to get selectedPresetId: %w", err)
 		}
-		return err
+
+		return c.Send(msg, presetMenuLayout(selectedPresetId))
+	})
+
+	b.Handle("/packs", func(c tele.Context) error {
+		msg := fmt.Sprintf("Жэээээсть, %s смотри че есть и жми", c.Sender().Username)
+		selectedPresetId, err := jri.Eda(c.Sender().ID)
+		if err != nil {
+			return fmt.Errorf("failed to get selectedPresetId: %w", err)
+		}
+
+		return c.Send(msg, presetMenuLayout(selectedPresetId))
+	})
+
+	b.Handle("\fpack", func(c tele.Context) error {
+		packId := c.Callback().Data
+		err := jri.SetEda(c.Sender().ID, packId)
+		if err != nil {
+			return err
+		}
+
+		_, err = b.Edit(c.Message(), presetMenuLayout(packId))
+		if err != nil {
+			fmt.Printf("falied to update inline menu: %s", err)
+			// Not good but packId is saved for user so send food anyway
+		}
+
+		food, err := jri.Jri(c.Sender().ID)
+		if err != nil {
+			return err
+		}
+
+		return c.Send(food)
 	})
 
 	b.Handle(tele.OnText, func(c tele.Context) error {
@@ -77,4 +101,24 @@ func main() {
 	})
 
 	b.Start()
+}
+
+func presetMenuLayout(packId string) *tele.ReplyMarkup {
+	basedStar := ""
+	if packId == jri.BasedPresetId {
+		basedStar = star
+	}
+
+	thaiStar := ""
+	if packId == jri.ThaiPresetId {
+		thaiStar = star
+	}
+
+	// Unique is best to be english letters only, otherwise the regex inside router breaks
+	buttons := [][]tele.InlineButton{
+		{tele.InlineButton{Text: basedStar + " Базированный пак", Unique: "pack", Data: jri.BasedPresetId}},
+		{tele.InlineButton{Text: thaiStar + "Тайский пак", Unique: "pack", Data: jri.ThaiPresetId}},
+	}
+
+	return &tele.ReplyMarkup{InlineKeyboard: buttons}
 }
