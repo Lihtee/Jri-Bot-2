@@ -6,7 +6,7 @@ import (
 	"log"
 	"time"
 
-	tele "gopkg.in/telebot.v3"
+	tele "gopkg.in/telebot.v4"
 )
 
 const jriCommand = "Че сожрать"
@@ -25,7 +25,8 @@ var (
 func main() {
 	pref := tele.Settings{
 		//Token:  os.Getenv("TOKEN"),
-		Token:   "7624316444:AAHWLQNfzGOjzjf0p99l8WHe5nwPcHXpGZQ",
+		//Token:   "7624316444:AAHWLQNfzGOjzjf0p99l8WHe5nwPcHXpGZQ",
+		Token:   "7653499359:AAGXRxeEM2JUJsQVb8I_8s5_BbvB6gQaCDg",
 		Poller:  &tele.LongPoller{Timeout: 10 * time.Second},
 		Verbose: false,
 	}
@@ -114,8 +115,14 @@ func presetMenuLayout(packId string) *tele.ReplyMarkup {
 
 	// Unique is best to be english letters only, otherwise the regex inside router breaks
 	buttons := [][]tele.InlineButton{
-		{tele.InlineButton{Text: basedStar + " Базированный пак", Unique: "pack", Data: jri.BasedPresetId}},
-		{tele.InlineButton{Text: thaiStar + "Тайский пак", Unique: "pack", Data: jri.ThaiPresetId}},
+		{
+			tele.InlineButton{Text: basedStar + " Базированный пак", Unique: "pack", Data: jri.BasedPresetId},
+			tele.InlineButton{Text: "######\n#######", Unique: "che", Data: jri.BasedPresetId},
+		},
+		{
+			tele.InlineButton{Text: thaiStar + "Тайский пак", Unique: "pack", Data: jri.ThaiPresetId},
+			tele.InlineButton{Text: "Че тут", Unique: "che", Data: jri.ThaiPresetId},
+		},
 	}
 
 	return &tele.ReplyMarkup{InlineKeyboard: buttons}
