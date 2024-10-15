@@ -1,7 +1,8 @@
-FROM golang:1.23.2-alpine3.20
-COPY src/* /src
-WORKDIR /bot
+FROM golang:1.23.0-alpine3.20
 
-RUN go build -C ../src -o ../bot/bot
+WORKDIR /src
+COPY src .
 
-ENTRYPOINT ["/bot/bot"]
+RUN go build -o bot
+
+ENTRYPOINT ["./bot"]
