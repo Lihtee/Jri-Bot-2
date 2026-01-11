@@ -6,14 +6,16 @@ import (
 )
 
 const (
-	BasedPresetId = "based"
-	ThaiPresetId  = "thai"
-	defaultId     = BasedPresetId
+	BasedPresetId    = "based"
+	ThaiPresetId     = "thai"
+	GeorgianPresetId = "georgian"
+	defaultId        = BasedPresetId
 )
 
 var Presets = map[string]Preset{
-	BasedPresetId: BasedPreset,
-	ThaiPresetId:  ThaiPreset,
+	BasedPresetId:    BasedPreset,
+	ThaiPresetId:     ThaiPreset,
+	GeorgianPresetId: GeorgianPreset,
 }
 
 type Storage struct {

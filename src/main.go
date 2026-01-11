@@ -2,9 +2,11 @@ package main
 
 import (
 	"fmt"
-	"github.com/dreyspi/jribot2/jri"
 	"log"
+	"os"
 	"time"
+
+	"github.com/dreyspi/jribot2/jri"
 
 	tele "gopkg.in/telebot.v4"
 )
@@ -24,9 +26,7 @@ var (
 
 func main() {
 	pref := tele.Settings{
-		//Token:  os.Getenv("TOKEN"),
-		//Token:   "7624316444:AAHWLQNfzGOjzjf0p99l8WHe5nwPcHXpGZQ",
-		Token:   "7653499359:AAGXRxeEM2JUJsQVb8I_8s5_BbvB6gQaCDg",
+		Token:   os.Getenv("TOKEN"),
 		Poller:  &tele.LongPoller{Timeout: 10 * time.Second},
 		Verbose: false,
 	}
@@ -99,31 +99,35 @@ func main() {
 		return c.Send("Жми кнопку жэсть", replyLayout)
 	})
 
+	fmt.Println("Starting")
 	b.Start()
 }
 
 func presetMenuLayout(packId string) *tele.ReplyMarkup {
-	basedStar := ""
-	if packId == jri.BasedPresetId {
-		basedStar = star
-	}
-
-	thaiStar := ""
-	if packId == jri.ThaiPresetId {
-		thaiStar = star
-	}
 
 	// Unique is best to be english letters only, otherwise the regex inside router breaks
 	buttons := [][]tele.InlineButton{
 		{
-			tele.InlineButton{Text: basedStar + " Базированный пак", Unique: "pack", Data: jri.BasedPresetId},
-			tele.InlineButton{Text: "######\n#######", Unique: "che", Data: jri.BasedPresetId},
+			tele.InlineButton{Text: getStar(packId, jri.BasedPresetId) + " Базированный пак", Unique: "pack", Data: jri.BasedPresetId},
+			tele.InlineButton{Text: "Че тут", Unique: "che", Data: jri.BasedPresetId},
 		},
 		{
-			tele.InlineButton{Text: thaiStar + "Тайский пак", Unique: "pack", Data: jri.ThaiPresetId},
+			tele.InlineButton{Text: getStar(packId, jri.ThaiPresetId) + "Тайский пак", Unique: "pack", Data: jri.ThaiPresetId},
 			tele.InlineButton{Text: "Че тут", Unique: "che", Data: jri.ThaiPresetId},
+		},
+		{
+			tele.InlineButton{Text: getStar(packId, jri.GeorgianPresetId) + "Грузинский пак", Unique: "pack", Data: jri.GeorgianPresetId},
+			tele.InlineButton{Text: "Че тут", Unique: "che", Data: jri.GeorgianPresetId},
 		},
 	}
 
 	return &tele.ReplyMarkup{InlineKeyboard: buttons}
+}
+
+func getStar(selectedPackId string, menuPackId string) string {
+	if selectedPackId == menuPackId {
+		return star
+	}
+
+	return ""
 }
