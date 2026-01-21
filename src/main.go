@@ -23,6 +23,7 @@ var (
 			{jriButton},
 		},
 	}
+	markdownParseMode = "MarkdownV2"
 )
 
 func main() {
@@ -104,7 +105,7 @@ func main() {
 		}
 
 		message := strings.Join(pack, "\n\r")
-		return c.Send(message, replyLayout)
+		return c.Send(message, replyLayout, markdownParseMode)
 	})
 
 	b.Handle(tele.OnText, func(c tele.Context) error {

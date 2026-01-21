@@ -1,6 +1,11 @@
 package frequency
 
 type Frequency int
+type PluralWordForms struct {
+	One        string
+	TwoToFour  string
+	FiveToZero string
+}
 
 const (
 	Year  Frequency = 1
@@ -8,3 +13,9 @@ const (
 	Week  Frequency = Month * 4
 	Day   Frequency = 365 // Use number of day in a year as basis for everything.
 )
+
+var HumanizedTimesWordForm = &PluralWordForms{
+	One:        "Раз",
+	TwoToFour:  "Раза",
+	FiveToZero: "Раз",
+}

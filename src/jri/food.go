@@ -18,6 +18,10 @@ type Food struct {
 
 var storage = NewStorage()
 
+func NewFood(nominativeName string, genitiveName string, emoji string, frequency fr.Frequency, factor int) *Food {
+	return &Food{nominativeName, genitiveName, emoji, frequency, factor}
+}
+
 func Jri(userId int64) (string, error) {
 	presetId, err := storage.GetOrInitUserPreset(userId)
 	if err != nil {
@@ -58,12 +62,54 @@ func CheTut(packId string) ([]string, error) {
 
 	result := make([]string, len(preset))
 	for index, food := range preset {
-		runes := []rune(food.NominativeName)
-		runes[0] = unicode.ToUpper(runes[0])
-		result[index] = fmt.Sprintf("%s %s", food.Emoji, string(runes))
+		result[index] = formatCheTut(food)
 	}
 
 	return result, nil
+}
+
+func formatCheTut(food *Food) string {
+	foodName := []rune(food.NominativeName)
+	foodName[0] = unicode.ToUpper(foodName[0])
+
+	period := formatCheTutPeriod(food)
+
+	return fmt.Sprintf("%s *%s* \\-\\> %s", food.Emoji, string(foodName), period)
+}
+
+func formatCheTutPeriod(food *Food) string {
+	if food.Factor == 0 {
+		return "*не жрать*"
+	}
+
+	var frequency string
+	switch food.Frequency {
+	case fr.Year:
+		frequency = "год"
+		break
+	case fr.Month:
+		frequency = "месяц"
+		break
+	case fr.Week:
+		frequency = "неделю"
+		break
+	case fr.Day:
+		frequency = "день"
+		break
+	default:
+		return "*не жрать*"
+	}
+
+	var times string
+	if food.Factor == 1 {
+		times = "раз"
+	} else if food.Factor >= 2 && food.Factor <= 4 {
+		times = fmt.Sprintf("%d раза", food.Factor)
+	} else {
+		times = fmt.Sprintf("%d раз", food.Factor)
+	}
+
+	return fmt.Sprintf("*%s* в *%s*", times, frequency)
 }
 
 func (food *Food) toChoice() wr.Choice {
@@ -92,8 +138,4 @@ func newChooser(preset Preset) (*wr.Chooser, error) {
 	}
 
 	return chooser, nil
-}
-
-func NewFood(nominativeName string, genitiveName string, emoji string, frequency fr.Frequency, factor int) *Food {
-	return &Food{nominativeName, genitiveName, emoji, frequency, factor}
 }
