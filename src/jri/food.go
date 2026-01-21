@@ -11,6 +11,7 @@ import (
 type Food struct {
 	NominativeName string
 	GenitiveName   string
+	Emoji          string
 	Frequency      fr.Frequency
 	Factor         int
 }
@@ -59,7 +60,7 @@ func CheTut(packId string) ([]string, error) {
 	for index, food := range preset {
 		runes := []rune(food.NominativeName)
 		runes[0] = unicode.ToUpper(runes[0])
-		result[index] = string(runes)
+		result[index] = fmt.Sprintf("%s %s", food.Emoji, string(runes))
 	}
 
 	return result, nil
@@ -67,17 +68,17 @@ func CheTut(packId string) ([]string, error) {
 
 func (food *Food) toChoice() wr.Choice {
 	return wr.Choice{
-		Item:   buildChoiceName(food.GenitiveName),
+		Item:   buildChoiceName(food),
 		Weight: uint(int(food.Frequency) * food.Factor),
 	}
 }
 
-func buildChoiceName(foodName string) string {
-	if len(foodName) == 0 {
+func buildChoiceName(food *Food) string {
+	if len(food.GenitiveName) == 0 {
 		return "Ниче не жри"
 	}
 
-	return "Сожри " + foodName
+	return fmt.Sprintf("Сожри %s %s", food.GenitiveName, food.Emoji)
 }
 
 func newChooser(preset Preset) (*wr.Chooser, error) {
@@ -93,6 +94,6 @@ func newChooser(preset Preset) (*wr.Chooser, error) {
 	return chooser, nil
 }
 
-func NewFood(nominativeName string, genitiveName string, frequency fr.Frequency, factor int) *Food {
-	return &Food{nominativeName, genitiveName, frequency, factor}
+func NewFood(nominativeName string, genitiveName string, emoji string, frequency fr.Frequency, factor int) *Food {
+	return &Food{nominativeName, genitiveName, emoji, frequency, factor}
 }
