@@ -2,12 +2,17 @@ package jri
 
 import (
 	"fmt"
+	"unicode"
+
+	fr "github.com/dreyspi/jribot2/frequency"
 	wr "github.com/mroth/weightedrand"
 )
 
 type Food struct {
-	Name   string
-	Weight int
+	NominativeName string
+	GenitiveName   string
+	Frequency      fr.Frequency
+	Factor         int
 }
 
 var storage = NewStorage()
@@ -40,8 +45,39 @@ func SetEda(userId int64, eda string) error {
 	return storage.PutUserPreset(userId, eda)
 }
 
+func CheTut(packId string) ([]string, error) {
+	if packId == "" {
+		return nil, fmt.Errorf("empty pack id")
+	}
+
+	preset, ok := Presets[packId]
+	if !ok {
+		return nil, fmt.Errorf("no preset found for pack id %s", packId)
+	}
+
+	result := make([]string, len(preset))
+	for index, food := range preset {
+		runes := []rune(food.NominativeName)
+		runes[0] = unicode.ToUpper(runes[0])
+		result[index] = string(runes)
+	}
+
+	return result, nil
+}
+
 func (food *Food) toChoice() wr.Choice {
-	return wr.Choice{Item: food.Name, Weight: uint(food.Weight)}
+	return wr.Choice{
+		Item:   buildChoiceName(food.GenitiveName),
+		Weight: uint(int(food.Frequency) * food.Factor),
+	}
+}
+
+func buildChoiceName(foodName string) string {
+	if len(foodName) == 0 {
+		return "Ниче не жри"
+	}
+
+	return "Сожри " + foodName
 }
 
 func newChooser(preset Preset) (*wr.Chooser, error) {
@@ -57,6 +93,6 @@ func newChooser(preset Preset) (*wr.Chooser, error) {
 	return chooser, nil
 }
 
-func NewFood(name string, weight int) *Food {
-	return &Food{name, weight}
+func NewFood(nominativeName string, genitiveName string, frequency fr.Frequency, factor int) *Food {
+	return &Food{nominativeName, genitiveName, frequency, factor}
 }

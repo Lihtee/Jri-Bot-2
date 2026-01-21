@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/dreyspi/jribot2/jri"
@@ -82,7 +83,7 @@ func main() {
 		_, err = b.Edit(c.Message(), presetMenuLayout(packId))
 		if err != nil {
 			// Not good but packId is saved for user so send food anyway
-			fmt.Printf("falied to update inline menu: %s", err)
+			fmt.Printf("failed to update inline menu: %s", err)
 			// Send something to unlock the button
 			_ = c.Respond(&tele.CallbackResponse{})
 		}
@@ -93,6 +94,17 @@ func main() {
 		}
 
 		return c.Send(food, replyLayout)
+	})
+
+	b.Handle("\fche", func(c tele.Context) error {
+		packId := c.Callback().Data
+		pack, err := jri.CheTut(packId)
+		if err != nil {
+			return err
+		}
+
+		message := strings.Join(pack, "\n\r")
+		return c.Send(message, replyLayout)
 	})
 
 	b.Handle(tele.OnText, func(c tele.Context) error {

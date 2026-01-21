@@ -1,10 +1,10 @@
 package frequency
 
-// Use number of day in a year as basis for everything.
+type Frequency int
 
 const (
-	Year  = 1
-	Month = 12
-	Week  = Month * 4
-	Day   = 365
+	Year  Frequency = 1
+	Month Frequency = 12
+	Week  Frequency = Month * 4
+	Day   Frequency = 365 // Use number of day in a year as basis for everything.
 )
