@@ -66,7 +66,17 @@ func main() {
 	b.Handle("/start", func(c tele.Context) error {
 		msg := fmt.Sprintf("Жэээээсть, %s опять жрать хочет", c.Sender().Username)
 
-		return c.Send(msg, replyLayout)
+		err := c.Send(msg, replyLayout)
+		if err != nil {
+			return fmt.Errorf("failed to send start message: %w", err)
+		}
+
+		food, err := che.Sojrat(c.Sender().ID)
+		if err != nil {
+			return fmt.Errorf("failed to get food: %w", err)
+		}
+
+		return c.Send(food, replyLayout)
 	})
 
 	b.Handle("/packs", func(c tele.Context) error {
@@ -76,7 +86,7 @@ func main() {
 			return fmt.Errorf("failed to get selectedPresetId: %w", err)
 		}
 
-		return c.Send(msg, presetMenuLayout(selectedPresetId))
+		return c.Send(msg, presetMenuLayout(selectedPresetId), replyLayout)
 	})
 
 	b.Handle("\fpack", func(c tele.Context) error {
