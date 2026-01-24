@@ -13,6 +13,9 @@ const userId = 2
 
 // Tests if weighted distribution works as expected
 func TestDistribution(t *testing.T) {
+	storage := NewTestStorage()
+	che := NewChe(storage)
+
 	preset := make([]wr.Choice, len(BasedPreset))
 	for i, food := range BasedPreset {
 		preset[i] = food.toChoice()
@@ -20,7 +23,7 @@ func TestDistribution(t *testing.T) {
 	totalSamples := samplesPerItem * len(preset)
 	distr := map[string]int{}
 	for i := 0; i < totalSamples; i++ {
-		food, err := Jri(userId)
+		food, err := che.Sojrat(userId)
 		if err != nil {
 			t.Fatalf("%v", err)
 		}

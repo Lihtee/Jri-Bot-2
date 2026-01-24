@@ -27,6 +27,11 @@ var (
 )
 
 func main() {
+	storage, closeStorage := initStorage()
+	defer closeStorage()
+
+	che := jri.NewChe(storage)
+
 	pref := tele.Settings{
 		Token:   os.Getenv("TOKEN"),
 		Poller:  &tele.LongPoller{Timeout: 10 * time.Second},
@@ -50,7 +55,7 @@ func main() {
 	}
 
 	b.Handle(jriCommand, func(c tele.Context) error {
-		food, err := jri.Jri(c.Sender().ID)
+		food, err := che.Sojrat(c.Sender().ID)
 		if err != nil {
 			return fmt.Errorf("failed to get food: %w", err)
 		}
@@ -66,7 +71,7 @@ func main() {
 
 	b.Handle("/packs", func(c tele.Context) error {
 		msg := fmt.Sprintf("Жэээээсть, %s смотри че есть и жми", c.Sender().Username)
-		selectedPresetId, err := jri.Eda(c.Sender().ID)
+		selectedPresetId, err := che.UMenya(c.Sender().ID)
 		if err != nil {
 			return fmt.Errorf("failed to get selectedPresetId: %w", err)
 		}
@@ -76,7 +81,7 @@ func main() {
 
 	b.Handle("\fpack", func(c tele.Context) error {
 		packId := c.Callback().Data
-		err := jri.SetEda(c.Sender().ID, packId)
+		err := che.Viberi(c.Sender().ID, packId)
 		if err != nil {
 			return err
 		}
@@ -89,7 +94,7 @@ func main() {
 			_ = c.Respond(&tele.CallbackResponse{})
 		}
 
-		food, err := jri.Jri(c.Sender().ID)
+		food, err := che.Sojrat(c.Sender().ID)
 		if err != nil {
 			return err
 		}
@@ -99,7 +104,7 @@ func main() {
 
 	b.Handle("\fche", func(c tele.Context) error {
 		packId := c.Callback().Data
-		pack, err := jri.CheTut(packId)
+		pack, err := jri.Tut(packId)
 		if err != nil {
 			return err
 		}
@@ -113,7 +118,19 @@ func main() {
 	})
 
 	fmt.Println("Starting")
+
 	b.Start()
+}
+
+func initStorage() (jri.Storage, func() error) {
+	storagePath := os.Getenv("STORAGE_PATH")
+	if storagePath == "" {
+		defaultPath := "local/storage.db"
+		log.Printf("STORAGE_PATH environment variable not set, defaulting to %s\n", defaultPath)
+		storagePath = defaultPath
+	}
+	var storage = jri.NewStorage(storagePath)
+	return storage, storage.Close
 }
 
 func presetMenuLayout(packId string) *tele.ReplyMarkup {
