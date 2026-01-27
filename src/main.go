@@ -86,7 +86,7 @@ func main() {
 			return fmt.Errorf("failed to get selectedPresetId: %w", err)
 		}
 
-		return c.Send(msg, presetMenuLayout(selectedPresetId), replyLayout)
+		return c.Send(msg, presetMenuLayout(selectedPresetId))
 	})
 
 	b.Handle("\fpack", func(c tele.Context) error {
