@@ -75,7 +75,7 @@ var GeorgianPreset = Preset{
 	NewFood("сэсвич", "сэсвич", "🥪", fr.Month, 2),
 	NewFood("стейк", "стейк", "🥩", fr.Month, 2),
 	NewFood("блин", "блин", "🥞", fr.Month, 2),
-	NewFood("снэк", "снэк", "🍿", fr.Week, 2),
+	NewFood("снэк", "снэк", "🍿", fr.Month, 2),
 	NewFood("рамен", "рамен", "🍜", fr.Month, 1),
 	NewFood("корейская куриц", "корейскую куриц", "🍗", fr.Week, 1),
 	NewFood("чабуреки", "чабуреки", "🥟", fr.Month, 2),
